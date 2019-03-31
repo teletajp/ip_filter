@@ -1,0 +1,29 @@
+dist: xenial
+language: cpp
+compiler: clang
+before_script:
+- sudo apt update
+- sudo apt install libgtest-dev -y
+- sudo apt install clang -y
+- sudo apt install cmake
+- cd /usr/src/gtest
+- sudo cmake .
+- sudo make
+- sudo cp *.a /usr/lib
+- sudo mkdir /usr/local/lib/gtest
+- sudo ln -s /usr/lib/libgtest.a /usr/local/lib/gtest/libgtest.a
+- sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/gtest/libgtest_main.a
+script:
+- cd /home/travis/build/teletajp/ip_filter
+- mkdir build
+- cd build
+- cmake ..
+- cmake --build .
+- cmake --build . --target test
+- cmake --build . --target package
+deploy:
+  provider: script
+  skip_cleanup: true
+  script:
+  - curl -T ip_filter-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb -u teletajp:$BINTRAY_API_KEY "https://api.bintray.com/content/teletajp/otus-cpp/homework/$TRAVIS_BUILD_NUMBER/helloworld-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb;deb_distribution=xenial;deb_component=main;deb_architecture=amd64;publish=1"
+  

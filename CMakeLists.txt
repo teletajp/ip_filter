@@ -1,0 +1,17 @@
+cmake_minimum_required(VERSION 3.2)
+project(ip_filter VERSION 0.0.1)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib) 
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib) 
+
+add_subdirectory(src)
+find_package(Threads)
+find_package(GTest MODULE)
+if(GTest_FOUND AND Threads_FOUND)
+    enable_testing()
+    add_subdirectory(tests)
+else()
+    message(STATUS "Gtest not found! Tests will not build.")
+endif()
+
+
