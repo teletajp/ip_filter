@@ -11,5 +11,6 @@ set_target_properties(${TARGET_NAME} PROPERTIES
 )
 target_link_libraries(${TARGET_NAME} PRIVATE GTest::GTest GTest::Main Threads::Threads)
 target_include_directories(${TARGET_NAME} PRIVATE ../src)
-install(TARGETS ${TARGET_NAME} RUNTIME DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}) 
+install(TARGETS ${TARGET_NAME} RUNTIME DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+add_custom_target(run_tests COMMAND "ctest --build-run-dir ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 add_test(${TARGET_NAME} ${TARGET_NAME})
