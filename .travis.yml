@@ -20,6 +20,8 @@ script:
 - cmake ..
 - cd ..
 - cmake --build build
+- ls
+- ls build
 - cmake --build build/tests --target run_tests
 - cmake --build build --target package
 deploy:
