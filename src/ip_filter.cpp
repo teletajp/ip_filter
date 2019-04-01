@@ -166,7 +166,7 @@ ip_filter_ptr ip_filter_t::select( const std::string& n1, const std::string& n2,
             continue;
         if (!n3.empty() && ip.find(n3) != 3)
             continue;
-        if (!n4.empty() && ip.find(n4) !=41)
+        if (!n4.empty() && ip.find(n4) != 4)
             continue;
 
         res->insert(ip);
