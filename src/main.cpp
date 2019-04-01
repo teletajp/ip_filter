@@ -22,7 +22,7 @@ std::vector<std::string> split(const std::string &str, char d)
     return r;
 }
 
-int main(int argc, char const *argv[])
+int main(int/* argc*/, char const */*argv[]*/)
 {
     try
     {
@@ -35,7 +35,8 @@ int main(int argc, char const *argv[])
         }
 
         ip_tools::ip_filter_t main_filter;
-        auto res = main_filter.list_insert(ip_pool);
+        //auto res = main_filter.list_insert(ip_pool);
+		main_filter.list_insert(ip_pool);
         // std::cout << "inserted " << std::get<0>(res) << " ip, bad ip " << std::get<1>(res) << std::endl;
         auto filter_all = main_filter.select("", "", "", "", ip_tools::order_t::dsc_order);
         filter_all->print();

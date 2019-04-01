@@ -13,5 +13,3 @@ if(GTest_FOUND AND Threads_FOUND)
 else()
     message(STATUS "Gtest not found! Tests will not build.")
 endif()
-
-
