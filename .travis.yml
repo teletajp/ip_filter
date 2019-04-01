@@ -18,9 +18,9 @@ script:
 - mkdir build
 - cd build
 - cmake ..
-- cmake --build .
-- cmake --build . --target test
-- cmake --build . --target package
+- cmake --build ..
+- cmake --build ../build --target test
+- cmake --build ../build --target package
 deploy:
   provider: script
   skip_cleanup: true
