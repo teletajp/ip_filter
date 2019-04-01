@@ -22,7 +22,8 @@ script:
 - cmake --build build
 - ls
 - ls build
-- cmake --build build/tests --target run_tests
+- ls bin
+- cmake --build build/tests --target test
 - cmake --build build --target package
 deploy:
   provider: script
