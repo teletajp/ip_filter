@@ -11,5 +11,6 @@ set_target_properties(${TARGET_NAME} PROPERTIES
 )
 target_link_libraries(${TARGET_NAME} PRIVATE GTest::GTest GTest::Main Threads::Threads)
 target_include_directories(${TARGET_NAME} PRIVATE ../src)
-add_test(${TARGET_NAME} COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET_NAME})
-add_custom_target(run_tests COMMAND "${CMAKE_CTEST_COMMAND} --build-and-test --test-command ../bin/${TARGET_NAME}")
+add_test(${TARGET_NAME} ${TARGET_NAME})
+set_tests_properties( ${TARGET_NAME} PROPERTIES WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+#add_custom_target(run_tests COMMAND "${CMAKE_CTEST_COMMAND} --build-and-test --test-command ../bin/${TARGET_NAME}")
