@@ -47,10 +47,11 @@ class ip_filter_t
     inline uint32_t count() const {return ip_list_size;};
     bool insert(const std::string &ip_string);
     std::tuple<uint32_t/*inserted*/,uint32_t/*not_inserted*/> list_insert(const std::list<std::string> &ip_string_list);
-    std::shared_ptr<ip_filter_t> select( const std::string& n1, const std::string& n2, const std::string& n3, const std::string& n4, order_t order);
-    std::shared_ptr<ip_filter_t> select( const std::string& like,order_t order);
+    std::shared_ptr<ip_filter_t> select( const std::string& n1, const std::string& n2, const std::string& n3, const std::string& n4);
+    std::shared_ptr<ip_filter_t> select( const std::string& like);
     void sort(order_t order);
     void print();
+    void print(order_t order);
 };
 
 typedef std::shared_ptr<ip_filter_t> ip_filter_ptr;

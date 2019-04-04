@@ -1070,12 +1070,12 @@ std::string("93.179.90.82")};
 	ASSERT_EQ(1000, std::get<0>(res));
 	ASSERT_EQ(0, std::get<1>(res));
 	ASSERT_EQ(1000, ipf.count());
-	auto filter_1 = ipf.select("001","","","",ip_tools::order_t::dsc_order);
-	filter_1->print();
-	auto filter_46_70 = ipf.select("046","070","","",ip_tools::order_t::dsc_order);
-	filter_46_70->print();
-	auto filter_46 = ipf.select("046", ip_tools::order_t::dsc_order);
-	filter_46->print();
+	auto filter_1 = ipf.select("001","","","");
+	filter_1->print(ip_tools::order_t::dsc_order);
+	auto filter_46_70 = ipf.select("046","070","","");
+	filter_46_70->print(ip_tools::order_t::dsc_order);
+	auto filter_46 = ipf.select("046");
+	filter_46->print(ip_tools::order_t::dsc_order);
 }
 
 int main(int argc, char *argv[])

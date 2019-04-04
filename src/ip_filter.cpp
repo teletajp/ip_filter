@@ -135,6 +135,26 @@ void ip_filter_t::print()
     }
 }
 
+void ip_filter_t::print(order_t order)
+{
+    sort(order_t::asc_order);
+    if(order == order_t::asc_order)
+    {
+        for(auto ip = ip_list.begin(); ip != ip_list.end(); ++ip)
+        {
+            std::cout << ip->get_origin() << std::endl;
+        }
+    }
+    else
+    {
+        for(auto ip = ip_list.rbegin(); ip != ip_list.rend(); ++ip)
+        {
+            std::cout << ip->get_origin() << std::endl;
+        }
+    }
+    
+}
+
 void ip_filter_t::sort(order_t order)
 {
     if (order == asc_order)
@@ -143,7 +163,7 @@ void ip_filter_t::sort(order_t order)
         ip_list.sort(ip4_addr_t::less_comp);
 }
 
-ip_filter_ptr ip_filter_t::select(const std::string& like, order_t order)
+ip_filter_ptr ip_filter_t::select(const std::string& like)
 {
     auto res = std::make_shared<ip_filter_t>();
     for(const auto& ip:ip_list)
@@ -151,11 +171,10 @@ ip_filter_ptr ip_filter_t::select(const std::string& like, order_t order)
         if(ip.find(like))
         res->insert(ip);
     }
-    res->sort(order);
     return res;
 }
 
-ip_filter_ptr ip_filter_t::select( const std::string& n1, const std::string& n2, const std::string& n3, const std::string& n4, order_t order)
+ip_filter_ptr ip_filter_t::select( const std::string& n1, const std::string& n2, const std::string& n3, const std::string& n4)
 {
     auto res = std::make_shared<ip_filter_t>();
     for (const auto &ip : ip_list)
@@ -171,7 +190,6 @@ ip_filter_ptr ip_filter_t::select( const std::string& n1, const std::string& n2,
 
         res->insert(ip);
     }
-    res->sort(order);
     return res;
 }
 
