@@ -11,9 +11,8 @@ set($NEED_COMPILE_OPTION )
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
-    COMPILE_OPTIONS "$<IF:$<CXX_COMPILER_ID:MSVC>,"
-                        "/we /Wall /WX,"
-                        "-Wpedantic;-Wall;-Wextra>"
+    COMPILE_OPTIONS "-Wpedantic;-Wall;-Wextra"
+    #COMPILE_OPTIONS "$<IF:$<CXX_COMPILER_ID:MSVC>,/we /Wall /WX, -Wpedantic;-Wall;-Wextra>"
 )
 
 if(UNIX)
