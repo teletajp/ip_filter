@@ -4,56 +4,23 @@
 
 TEST(ip_filter_test, ip4_addr_test)
 {
-    ip_tools::ip4_addr_t ip("127.0.0.1");
-	ASSERT_TRUE(ip.is_valid());
-
-	ip_tools::ip4_addr_t ip1("");
-	ASSERT_FALSE(ip1.is_valid());
-
-	ip_tools::ip4_addr_t ip2(".");
-	ASSERT_FALSE(ip2.is_valid());
-
-	ip_tools::ip4_addr_t ip3("...");
-	ASSERT_FALSE(ip3.is_valid());
-
-	ip_tools::ip4_addr_t ip4("1.1.1.");
-	ASSERT_FALSE(ip4.is_valid());
-
-	ip_tools::ip4_addr_t ip5("1.1.1.0000");
-	ASSERT_FALSE(ip5.is_valid());
-
-	ip_tools::ip4_addr_t ip6("1.1.1.256");
-	ASSERT_FALSE(ip6.is_valid());
-
-	ip_tools::ip4_addr_t ip7("1.1.1.265");
-	ASSERT_FALSE(ip7.is_valid());
-
-	ip_tools::ip4_addr_t ip8("1.1.1.265");
-	ASSERT_FALSE(ip8.is_valid());
-
-	ip_tools::ip4_addr_t ip9("1.1.1.355");
-	ASSERT_FALSE(ip9.is_valid());
-
-	ip_tools::ip4_addr_t ip10(".1.1.255");
-	ASSERT_FALSE(ip10.is_valid());
-
-	ip_tools::ip4_addr_t ip11("0..001.255");
-	ASSERT_FALSE(ip11.is_valid());
-
-	ip_tools::ip4_addr_t ip12("256.1.1.255");
-	ASSERT_FALSE(ip12.is_valid());
-
-	ip_tools::ip4_addr_t ip13("255.255.255.255");
-	ASSERT_TRUE(ip13.is_valid());
-
-	ip_tools::ip4_addr_t ip14("01.000.01.255");
-	ASSERT_TRUE(ip14.is_valid());
-
-	ip_tools::ip4_addr_t ip15("0.0.0.0");
-	ASSERT_TRUE(ip15.is_valid());
-
-	ip_tools::ip4_addr_t ip16("a.255.255.255");
-	ASSERT_FALSE(ip16.is_valid());
+    ip_tools::ip_filter_t ipf;
+    ASSERT_TRUE(ipf.insert("127.0.0.1"));
+	ASSERT_FALSE(ipf.insert(""));
+	ASSERT_FALSE(ipf.insert("."));
+	ASSERT_FALSE(ipf.insert("..."));
+    ASSERT_FALSE(ipf.insert("1.1.1.0000"));
+	ASSERT_FALSE(ipf.insert("1.1.1.256"));
+	ASSERT_FALSE(ipf.insert("1.1.1.265"));
+	ASSERT_FALSE(ipf.insert("1.1.256.1"));
+	ASSERT_FALSE(ipf.insert("1.1.1.355"));
+	ASSERT_FALSE(ipf.insert(".1.1.255"));
+	ASSERT_FALSE(ipf.insert("0..001.255"));
+	ASSERT_FALSE(ipf.insert("256.1.1.255"));
+	ASSERT_TRUE(ipf.insert("255.255.255.255"));
+	ASSERT_TRUE(ipf.insert("01.000.01.255"));
+	ASSERT_TRUE(ipf.insert("0.0.0.0"));
+	ASSERT_FALSE(ipf.insert("a.255.255.255"));
 }
 
 TEST(ip_filter_test, insert)
@@ -1070,11 +1037,13 @@ std::string("93.179.90.82")};
 	ASSERT_EQ(1000, std::get<0>(res));
 	ASSERT_EQ(0, std::get<1>(res));
 	ASSERT_EQ(1000, ipf.count());
+    auto filter_all = ipf.select("", "", "", "");
+    filter_all->print(ip_tools::order_t::dsc_order);
 	auto filter_1 = ipf.select("001","","","");
 	filter_1->print(ip_tools::order_t::dsc_order);
 	auto filter_46_70 = ipf.select("046","070","","");
 	filter_46_70->print(ip_tools::order_t::dsc_order);
-	auto filter_46 = ipf.select("046");
+	auto filter_46 = ipf.select_by_digit("046");
 	filter_46->print(ip_tools::order_t::dsc_order);
 }
 

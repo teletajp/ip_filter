@@ -44,7 +44,7 @@ int main()
         filter_1->print(ip_tools::order_t::dsc_order);
         auto filter_46_70 = main_filter.select("046", "070", "", "");
         filter_46_70->print(ip_tools::order_t::dsc_order);
-        auto filter_46 = main_filter.select("046");
+        auto filter_46 = main_filter.select_by_digit("046");
         filter_46->print(ip_tools::order_t::dsc_order);
     }
     catch(const std::exception& e)

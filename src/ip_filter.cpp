@@ -1,72 +1,42 @@
 #include "ip_filter.h"
 #include <cctype>
 #include <iostream>
-
+#include <algorithm>
 namespace ip_tools
 {
-
-ip4_addr_t::ip4_addr_t(const std::string &origin_ip)
+bool ip_filter_t::insert(const ip4_addr_t & ip_addr)
 {
-    internal = "000.000.000.000";
-    int ii = 14;
-    int oi = (int)origin_ip.length() - 1;
-    int c = 0;  //количество цифр в компоненте ip c>0 && c<4
-    int cc = 0; //количество компонентов ip cc==4
-    for (; ii >= 0 && oi >= 0; --ii)
-    {
-        char ch = origin_ip[oi];
-        if (std::isdigit(ch))
-        {
-            if (internal[ii] == '.')
-                break;
-            internal[ii] = ch;
-            ++c;
-            if (c > 3)
-                break;
-        }
-        else if (ch == '.')
-        {
-            if (c == 0 || c > 3)
-                break;
-            if (internal[ii] != '.')
-                continue;
-            c = 0;
-            ++cc;
-        }
-        else
-            break;
-
-        --oi;
-    }
-    if (c)
-        ++cc;
-    if (cc == 4)
-    {
-        if (!(
-                (internal[0] > '2' || (internal[0] == '2' && (internal[1] > '5' || (internal[1] == '5' && internal[2] > '5')))) || (internal[4] > '2' || (internal[4] == '2' && (internal[5] > '5' || (internal[5] == '5' && internal[6] > '5')))) || (internal[8] > '2' || (internal[8] == '2' && (internal[9] > '5' || (internal[9] == '5' && internal[10] > '5')))) || (internal[12] > '2' || (internal[12] == '2' && (internal[13] > '5' || (internal[13] == '5' && internal[14] > '5'))))))
-            origin = origin_ip;
-    }
+    ip_list.push_back(ip_addr);
+    return true;
 }
 
-const ip4_addr_t &ip4_addr_t::operator=(const ip4_addr_t &o)
+uint8_t ip_filter_t::find_digit(const ip4_addr_t& ip, const std::string & digit)
 {
-    origin = o.origin;
-    internal = o.internal;
-    return *this;
-}
+    uint8_t dig = 0;
+    try
+    {
+        int idig = std::stoi(digit);
+        if(idig < 0 || idig > 255)
+            return 0;
+        dig = (uint8_t)idig;
+    }
+    catch(...) { return 0; }
 
-uint8_t ip4_addr_t::find(const std::string &like) const
-{
-    auto pos = internal.find(like);
-    if (pos == std::string::npos)
-        return 0;
-    if (pos < 4)
+    if(std::get<0>(ip) == dig)
         return 1;
-    if (pos < 8)
+    if(std::get<1>(ip) == dig)
         return 2;
-    if (pos < 12)
+    if(std::get<2>(ip) == dig)
         return 3;
-    return 4;
+    if(std::get<3>(ip) == dig)
+        return 4;
+
+    return 0;
+}
+
+std::string ip_filter_t::to_string(const ip4_addr_t & ip)
+{
+    return std::to_string(std::get<0>(ip)) + "." + std::to_string(std::get<1>(ip)) + "." + std::to_string(std::get<2>(ip)) + "." + std::to_string(std::get<3>(ip));
 }
 
 ip_filter_t::ip_filter_t() : ip_list_size(0)
@@ -84,26 +54,57 @@ const ip_filter_t &ip_filter_t::operator=(const ip_filter_t &oth)
     return *this;
 }
 
-bool ip_filter_t::insert(const ip4_addr_t &ip_addr)
-{
-    if (ip_addr.is_valid())
-    {
-        ip_list.push_back(ip_addr);
-        ++ip_list_size;
-        return true;
-    }
-    return false;
-}
-
 bool ip_filter_t::insert(const std::string &ip_string)
 {
-    ip4_addr_t ip(ip_string);
-    if (ip.is_valid())
+    std::string::size_type beg, end, len;
+    beg = end = len = 0;
+    int dig = 0;
+    uint8_t d1, d2, d3, d4;
+    const auto max_len = ip_string.length();
+
+    try
     {
-        ip_list.push_back(ip);
-        ++ip_list_size;
+        end = ip_string.find('.', beg);
+        if(end == std::string::npos) return false;
+        len = end - beg;
+        if(len > 3) return false;
+        dig = std::stoi(ip_string.substr(beg, len));
+        if(dig < 0 || dig > 255) return false;
+        d1 = dig;
+        beg = end + 1;
+        if(beg >= max_len) return false;
+
+        end = ip_string.find('.', beg);
+        if(end == std::string::npos) return false;
+        len = end - beg;
+        if(len > 3) return false;
+        dig = std::stoi(ip_string.substr(beg, len));
+        if(dig < 0 || dig > 255) return false;
+        d2 = dig;
+        beg = end + 1;
+        if(beg >= max_len) return false;
+
+        end = ip_string.find('.', beg);
+        if(end == std::string::npos) return false;
+        len = end - beg;
+        if(len > 3) return false;
+        dig = std::stoi(ip_string.substr(beg, len));
+        if(dig < 0 || dig > 255) return false;
+        d3 = dig;
+        beg = end + 1;
+        if(beg >= max_len) return false;
+
+        len = max_len - beg;
+        if(len > 3) return false;
+        dig = std::stoi(ip_string.substr(beg, len));
+        if(dig < 0 || dig > 255) return false;
+        d4 = dig;
+
+        ip_list_size++;
+        ip_list.emplace_back(std::make_tuple(d1,d2,d3,d4));
         return true;
     }
+    catch(...){}
     return false;
 }
 
@@ -125,43 +126,40 @@ void ip_filter_t::print()
 {
     for (const auto &ip : ip_list)
     {
-        std::cout << ip.get_origin() << std::endl;
+        std::cout << to_string(ip) << std::endl;
     }
 }
 
 void ip_filter_t::print(order_t order)
 {
-    sort(order_t::asc_order);
+    sort();
     if (order == order_t::asc_order)
     {
         for (auto ip = ip_list.begin(); ip != ip_list.end(); ++ip)
         {
-            std::cout << ip->get_origin() << std::endl;
+            std::cout << to_string(*ip) << std::endl;
         }
     }
     else
     {
         for (auto ip = ip_list.rbegin(); ip != ip_list.rend(); ++ip)
         {
-            std::cout << ip->get_origin() << std::endl;
+            std::cout << to_string(*ip) << std::endl;
         }
     }
 }
 
-void ip_filter_t::sort(order_t order)
+void ip_filter_t::sort()
 {
-    if (order == order_t::asc_order)
-        ip_list.sort();
-    else
-        ip_list.sort(ip4_addr_t::less_comp);
+    ip_list.sort();
 }
 
-ip_filter_ptr ip_filter_t::select(const std::string &like)
+ip_filter_ptr ip_filter_t::select_by_digit(const std::string &digit)
 {
-    auto res = std::make_shared<ip_filter_t>();
-    for (const auto &ip : ip_list)
+    auto res = std::make_unique<ip_filter_t>();
+    for(const auto &ip : ip_list)
     {
-        if (ip.find(like))
+        if(find_digit(ip, digit))
             res->insert(ip);
     }
     return res;
@@ -169,16 +167,16 @@ ip_filter_ptr ip_filter_t::select(const std::string &like)
 
 ip_filter_ptr ip_filter_t::select(const std::string &n1, const std::string &n2, const std::string &n3, const std::string &n4)
 {
-    auto res = std::make_shared<ip_filter_t>();
+    auto res = std::make_unique<ip_filter_t>();
     for (const auto &ip : ip_list)
     {
-        if (!n1.empty() && ip.find(n1) != 1)
+        if (!n1.empty() && find_digit(ip, n1) != 1)
             continue;
-        if (!n2.empty() && ip.find(n2) != 2)
+        if (!n2.empty() && find_digit(ip, n2) != 2)
             continue;
-        if (!n3.empty() && ip.find(n3) != 3)
+        if (!n3.empty() && find_digit(ip, n3) != 3)
             continue;
-        if (!n4.empty() && ip.find(n4) != 4)
+        if (!n4.empty() && find_digit(ip, n4) != 4)
             continue;
 
         res->insert(ip);
