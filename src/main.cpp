@@ -38,14 +38,18 @@ int main()
         //auto res = main_filter.list_insert(ip_pool);
 		main_filter.list_insert(ip_pool);
         // std::cout << "inserted " << std::get<0>(res) << " ip, bad ip " << std::get<1>(res) << std::endl;
-        auto filter_all = main_filter.select("", "", "", "");
-        filter_all->print(ip_tools::order_t::dsc_order);
-        auto filter_1 = main_filter.select("001", "", "", "");
-        filter_1->print(ip_tools::order_t::dsc_order);
-        auto filter_46_70 = main_filter.select("046", "070", "", "");
-        filter_46_70->print(ip_tools::order_t::dsc_order);
+        auto filter_all = main_filter;
+        filter_all.sort(ip_tools::order_t::dsc_order);
+        filter_all.print();
+        auto filter_1 = main_filter.select(1);
+        filter_1->sort(ip_tools::order_t::dsc_order);
+        filter_1->print();
+        auto filter_46_70 = main_filter.select(46,70);
+        filter_46_70->sort(ip_tools::order_t::dsc_order);
+        filter_46_70->print();
         auto filter_46 = main_filter.select_by_digit("046");
-        filter_46->print(ip_tools::order_t::dsc_order);
+        filter_46->sort(ip_tools::order_t::dsc_order);
+        filter_46->print();
     }
     catch(const std::exception& e)
     {

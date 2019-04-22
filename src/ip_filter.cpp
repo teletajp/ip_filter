@@ -4,11 +4,6 @@
 #include <algorithm>
 namespace ip_tools
 {
-bool ip_filter_t::insert(const ip4_addr_t & ip_addr)
-{
-    ip_list.push_back(ip_addr);
-    return true;
-}
 
 uint8_t ip_filter_t::find_digit(const ip4_addr_t& ip, const std::string & digit)
 {
@@ -32,11 +27,6 @@ uint8_t ip_filter_t::find_digit(const ip4_addr_t& ip, const std::string & digit)
         return 4;
 
     return 0;
-}
-
-std::string ip_filter_t::to_string(const ip4_addr_t & ip)
-{
-    return std::to_string(std::get<0>(ip)) + "." + std::to_string(std::get<1>(ip)) + "." + std::to_string(std::get<2>(ip)) + "." + std::to_string(std::get<3>(ip));
 }
 
 ip_filter_t::ip_filter_t() : ip_list_size(0)
@@ -126,32 +116,16 @@ void ip_filter_t::print()
 {
     for (const auto &ip : ip_list)
     {
-        std::cout << to_string(ip) << std::endl;
+        std::cout << std::get<0>(ip) << "." << std::get<1>(ip) << "." << std::get<2>(ip) << "." << std::get<3>(ip) << std::endl;
     }
 }
 
-void ip_filter_t::print(order_t order)
+void ip_filter_t::sort(order_t order)
 {
-    sort();
-    if (order == order_t::asc_order)
-    {
-        for (auto ip = ip_list.begin(); ip != ip_list.end(); ++ip)
-        {
-            std::cout << to_string(*ip) << std::endl;
-        }
-    }
-    else
-    {
-        for (auto ip = ip_list.rbegin(); ip != ip_list.rend(); ++ip)
-        {
-            std::cout << to_string(*ip) << std::endl;
-        }
-    }
-}
-
-void ip_filter_t::sort()
-{
-    ip_list.sort();
+    if(order == order_t::dsc_order)
+        ip_list.sort(std::greater<ip4_addr_t>());
+    else if(order == order_t::asc_order)
+        ip_list.sort();
 }
 
 ip_filter_ptr ip_filter_t::select_by_digit(const std::string &digit)
@@ -160,28 +134,28 @@ ip_filter_ptr ip_filter_t::select_by_digit(const std::string &digit)
     for(const auto &ip : ip_list)
     {
         if(find_digit(ip, digit))
-            res->insert(ip);
+            res->ip_list.push_back(ip);
     }
     return res;
 }
 
-ip_filter_ptr ip_filter_t::select(const std::string &n1, const std::string &n2, const std::string &n3, const std::string &n4)
-{
-    auto res = std::make_unique<ip_filter_t>();
-    for (const auto &ip : ip_list)
-    {
-        if (!n1.empty() && find_digit(ip, n1) != 1)
-            continue;
-        if (!n2.empty() && find_digit(ip, n2) != 2)
-            continue;
-        if (!n3.empty() && find_digit(ip, n3) != 3)
-            continue;
-        if (!n4.empty() && find_digit(ip, n4) != 4)
-            continue;
-
-        res->insert(ip);
-    }
-    return res;
-}
+//ip_filter_ptr ip_filter_t::select(uint8_t n1, uint8_t n2, uint8_t n3, uint8_t n4)
+//{
+//    auto res = std::make_unique<ip_filter_t>();
+//    for (const auto &ip : ip_list)
+//    {
+//        if (!n1.empty() && find_digit(ip, n1) != 1)
+//            continue;
+//        if (!n2.empty() && find_digit(ip, n2) != 2)
+//            continue;
+//        if (!n3.empty() && find_digit(ip, n3) != 3)
+//            continue;
+//        if (!n4.empty() && find_digit(ip, n4) != 4)
+//            continue;
+//
+//        res->insert(ip);
+//    }
+//    return res;
+//}
 
 } // namespace ip_tools
