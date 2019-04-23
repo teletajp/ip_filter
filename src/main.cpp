@@ -47,7 +47,7 @@ int main()
         auto filter_46_70 = main_filter.select(46,70);
         filter_46_70->sort(ip_tools::order_t::dsc_order);
         filter_46_70->print();
-        auto filter_46 = main_filter.select_by_digit("046");
+        auto filter_46 = main_filter.select_by_digit(46);
         filter_46->sort(ip_tools::order_t::dsc_order);
         filter_46->print();
     }

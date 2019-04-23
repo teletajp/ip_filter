@@ -23,7 +23,6 @@ class ip_filter_t
 {
     uint32_t ip_list_size;
     ip4_list_t ip_list;
-    uint8_t find_digit(const ip4_addr_t& ip, const std::string &digit);
   public:
     ip_filter_t();
     ~ip_filter_t();
@@ -33,52 +32,43 @@ class ip_filter_t
     inline uint32_t count() const { return ip_list_size; };
     bool insert(const std::string &ip_string);
     std::tuple<uint32_t /*inserted*/, uint32_t /*not_inserted*/> list_insert(const std::list<std::string> &ip_string_list);
-
-    template <uint8_t Indx>
-    bool ta_el_cmp(uint8_t Indx)
+    template<class ... Args>
+    std::unique_ptr<ip_filter_t> select(Args...args)
     {
-        return std::get<Indx>(ip) == values[Indx];
-    }
-
-    template<int ... ns>
-    bool is_filtered(ip4_addr_t ip, int...)
-    {
-        static const count = sizeof...(ns) - 1;
-        static_assert(count > 0 && count < 5, "invalid count arguments");
-        int values[count] = {ns...};
-        for(int i = 0; i < count; i++)
-        {
-            if(ta_el_cmp<i>(i))
-        }
-        if(count == 1)
-        {
-            if(std::get<0>(ip) == values[0])
-            {
-                if(count == 1)
-                    return true;
-            }
-            else
-                return false;
-        }
-    }
-
-    std::unique_ptr<ip_filter_t> select(int...)
-    {
-        std::array<uint8_t, sizeof...(ns)> filtr = {(uint8_t)ns...};
-        uint8_t max_ind = std::min(sizeof...(ns), std::tuple_size<ip4_addr_t>::value);
         auto res = std::make_unique<ip_filter_t>();
         for(const auto &ip : ip_list)
         {
-             if(std::get<0>(ip) != filtr[i])
-                 break;
-
-            if(i == max_ind)
+            auto ip2 = std::make_tuple(args...);
+            if(ip2 == ip)
                 res->ip_list.push_back(ip);
         }
         return res;
     };
-    //std::unique_ptr<ip_filter_t> select(uint8_t n1, uint8_t n2, uint8_t n3, uint8_t n4);
-    std::unique_ptr<ip_filter_t> select_by_digit(const std::string &like);
+
+    template<class tuple_t, std::size_t indx>
+    struct tuple_find_dig
+    {
+        static bool find(const uint8_t &dig, const tuple_t& t)
+        {
+            if(dig==std::get<indx>(t))
+                return true;
+            else
+                return tuple_find_dig<tuple_t,indx-1>::find(dig, t); 
+        };
+    };
+    template<class tuple_t>
+    struct tuple_find_dig<tuple_t,0>
+    {
+        static bool find(uint8_t dig, const tuple_t& t)
+        {
+            if(dig==std::get<0>(t))
+                return true;
+            else
+                return false; 
+        };
+    };
+
+    std::unique_ptr<ip_filter_t> select_by_digit(uint8_t dig);
     
     void sort(order_t order);
     void print();

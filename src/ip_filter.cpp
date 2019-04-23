@@ -5,30 +5,6 @@
 namespace ip_tools
 {
 
-uint8_t ip_filter_t::find_digit(const ip4_addr_t& ip, const std::string & digit)
-{
-    uint8_t dig = 0;
-    try
-    {
-        int idig = std::stoi(digit);
-        if(idig < 0 || idig > 255)
-            return 0;
-        dig = (uint8_t)idig;
-    }
-    catch(...) { return 0; }
-
-    if(std::get<0>(ip) == dig)
-        return 1;
-    if(std::get<1>(ip) == dig)
-        return 2;
-    if(std::get<2>(ip) == dig)
-        return 3;
-    if(std::get<3>(ip) == dig)
-        return 4;
-
-    return 0;
-}
-
 ip_filter_t::ip_filter_t() : ip_list_size(0)
 {
 }
@@ -116,7 +92,9 @@ void ip_filter_t::print()
 {
     for (const auto &ip : ip_list)
     {
-        std::cout << std::get<0>(ip) << "." << std::get<1>(ip) << "." << std::get<2>(ip) << "." << std::get<3>(ip) << std::endl;
+        std::string ip_str = std::to_string(std::get<0>(ip)) + "." + std::to_string((std::get<1>(ip))) 
+        + "." + std::to_string(std::get<2>(ip)) + "." + std::to_string(std::get<3>(ip));
+        std::cout << ip_str << std::endl;
     }
 }
 
@@ -128,34 +106,14 @@ void ip_filter_t::sort(order_t order)
         ip_list.sort();
 }
 
-ip_filter_ptr ip_filter_t::select_by_digit(const std::string &digit)
+ip_filter_ptr ip_filter_t::select_by_digit(uint8_t dig)
 {
     auto res = std::make_unique<ip_filter_t>();
     for(const auto &ip : ip_list)
     {
-        if(find_digit(ip, digit))
+        if(tuple_find_dig<ip4_addr_t,3>::find(dig, ip))
             res->ip_list.push_back(ip);
     }
     return res;
 }
-
-//ip_filter_ptr ip_filter_t::select(uint8_t n1, uint8_t n2, uint8_t n3, uint8_t n4)
-//{
-//    auto res = std::make_unique<ip_filter_t>();
-//    for (const auto &ip : ip_list)
-//    {
-//        if (!n1.empty() && find_digit(ip, n1) != 1)
-//            continue;
-//        if (!n2.empty() && find_digit(ip, n2) != 2)
-//            continue;
-//        if (!n3.empty() && find_digit(ip, n3) != 3)
-//            continue;
-//        if (!n4.empty() && find_digit(ip, n4) != 4)
-//            continue;
-//
-//        res->insert(ip);
-//    }
-//    return res;
-//}
-
 } // namespace ip_tools
