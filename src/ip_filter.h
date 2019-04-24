@@ -32,6 +32,35 @@ class ip_filter_t
     inline uint32_t count() const { return ip_list_size; };
     bool insert(const std::string &ip_string);
     std::tuple<uint32_t /*inserted*/, uint32_t /*not_inserted*/> list_insert(const std::list<std::string> &ip_string_list);
+
+    template<class Tuple1, class Tuple2, std::size_t indx>
+    struct tuple_el_coparator_t
+    {
+        static bool compare(Tuple1 ip1, Tuple2 ip2)
+        {
+            return std::get<indx>(ip1) == std::get<indx>(ip2);
+        }
+    };
+
+    template<class Tuple1, class Tuple2>
+    struct tuple_el_coparator_t<Tuple1, Tuple2, 0>
+    {
+        static bool compare(Tuple1 ip1, Tuple2 ip2)
+        {
+            return std::get<0>(ip1) == std::get<0>(ip2);
+        }
+    };
+
+    template <class ... Types>
+    struct tuple_comparator_t
+    {
+        static bool match(const ip4_addr_t &ip1, const std::tuple<Types...> ip2)
+        {
+            const std::size_t max_index = sizeof...(Types) > 4 ? 4 : sizeof...(Types);
+            return tuple_el_coparator_t<ip4_addr_t, decltype(ip2), max_index - 1>::compare(ip1, ip2);
+        }
+    };
+
     template<class ... Args>
     std::unique_ptr<ip_filter_t> select(Args...args)
     {
@@ -39,7 +68,7 @@ class ip_filter_t
         for(const auto &ip : ip_list)
         {
             auto ip2 = std::make_tuple(args...);
-            if(ip2 == ip)
+            if(tuple_comparator_t<Args...>::match(ip,ip2))
                 res->ip_list.push_back(ip);
         }
         return res;
