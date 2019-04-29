@@ -1051,6 +1051,18 @@ std::string("93.179.90.82")};
 	filter_46->print();
 }
 
+TEST(ip_filter_test, test46_70)
+{
+	ip_tools::ip_filter_t ipf;
+	ASSERT_EQ(1, ipf.insert("1.70.0.1"));
+	ASSERT_EQ(1, ipf.insert("2.70.0.1"));
+	ASSERT_EQ(1, ipf.insert("46.70.0.3"));
+	ASSERT_EQ(1, ipf.insert("46.70.0.4"));
+	auto filter_46_70 = ipf.select(46,70);
+    filter_46_70->sort(ip_tools::order_t::dsc_order);
+	filter_46_70->print();
+}
+
 int main(int argc, char *argv[])
 {
 	::testing::InitGoogleTest(&argc, argv);

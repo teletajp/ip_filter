@@ -3,7 +3,7 @@
 #include <list>
 #include <tuple>
 #include <memory>
-#include <array>
+#include <algorithm>
 namespace ip_tools
 {
 
@@ -36,40 +36,43 @@ class ip_filter_t
     template<class Tuple1, class Tuple2, std::size_t indx>
     struct tuple_el_coparator_t
     {
-        static bool compare(Tuple1 ip1, Tuple2 ip2)
+        static bool compare(const Tuple1 &ip1, const Tuple2 &ip2)
         {
-            return std::get<indx>(ip1) == std::get<indx>(ip2);
+            if( std::get<indx>(ip1) == std::get<indx>(ip2) )
+                return tuple_el_coparator_t<Tuple2, Tuple2, indx - 1>::compare(ip1, ip2);
+            return false;
         }
     };
 
     template<class Tuple1, class Tuple2>
     struct tuple_el_coparator_t<Tuple1, Tuple2, 0>
     {
-        static bool compare(Tuple1 ip1, Tuple2 ip2)
+        static bool compare(const Tuple1 &ip1, const Tuple2 &ip2)
         {
             return std::get<0>(ip1) == std::get<0>(ip2);
         }
     };
 
-    template <class ... Types>
+    template <class T>
     struct tuple_comparator_t
     {
-        static bool match(const ip4_addr_t &ip1, const std::tuple<Types...> ip2)
-        {
-            const std::size_t max_index = sizeof...(Types) > 4 ? 4 : sizeof...(Types);
-            return tuple_el_coparator_t<ip4_addr_t, decltype(ip2), max_index - 1>::compare(ip1, ip2);
+        static bool match(const ip4_addr_t &ip1, const T &ip2)
+        { 
+            const std::size_t max_index = std::tuple_size<T>::value;
+            return tuple_el_coparator_t<ip4_addr_t, T, max_index - 1>::compare(ip1, ip2);
         }
     };
 
-    template<class ... Args>
-    std::unique_ptr<ip_filter_t> select(Args...args)
+    template<uint8_t...ARGS> 
+    std::unique_ptr<ip_filter_t> select(ARGS...args)
     {
+        static_assert(sizeof...(ARGS) < 5, "ip filter len > 4");
         auto res = std::make_unique<ip_filter_t>();
-        for(const auto &ip : ip_list)
+        for(const auto &ip1 : ip_list)
         {
-            auto ip2 = std::make_tuple(args...);
-            if(tuple_comparator_t<Args...>::match(ip,ip2))
-                res->ip_list.push_back(ip);
+            const std::tuple<ARGS...> ip2;
+            if(tuple_comparator_t<decltype(ip2)>::match(ip1,ip2))
+                res->ip_list.push_back(ip1);
         }
         return res;
     };
