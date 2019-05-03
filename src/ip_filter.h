@@ -36,11 +36,10 @@ class ip_filter_t
     template<class Tuple1, class Tuple2, std::size_t indx>
     struct tuple_el_coparator_t
     {
+        
         static bool compare(const Tuple1 &ip1, const Tuple2 &ip2)
         {
-            if( std::get<indx>(ip1) == std::get<indx>(ip2) )
-                return tuple_el_coparator_t<Tuple2, Tuple2, indx - 1>::compare(ip1, ip2);
-            return false;
+            return (std::get<indx>(ip1) == std::get<indx>(ip2)) && tuple_el_coparator_t<Tuple1,Tuple2,indx - 1>::compare(ip1, ip2);
         }
     };
 
@@ -59,18 +58,21 @@ class ip_filter_t
         static bool match(const ip4_addr_t &ip1, const T &ip2)
         { 
             const std::size_t max_index = std::tuple_size<T>::value;
-            return tuple_el_coparator_t<ip4_addr_t, T, max_index - 1>::compare(ip1, ip2);
+            if(max_index == 0)
+            return true;
+            return tuple_el_coparator_t<decltype(ip1),decltype(ip2),max_index - 1>::compare(ip1, ip2);
         }
     };
 
-    template<uint8_t...ARGS> 
+    template<class...ARGS> 
     std::unique_ptr<ip_filter_t> select(ARGS...args)
     {
-        static_assert(sizeof...(ARGS) < 5, "ip filter len > 4");
+        static_assert(sizeof...(args) > 0, "ip filter len <= 0");
+        static_assert(sizeof...(args) < 5, "ip filter len > 4");
         auto res = std::make_unique<ip_filter_t>();
+        const auto ip2 = std::make_tuple(args...);
         for(const auto &ip1 : ip_list)
         {
-            const std::tuple<ARGS...> ip2;
             if(tuple_comparator_t<decltype(ip2)>::match(ip1,ip2))
                 res->ip_list.push_back(ip1);
         }
